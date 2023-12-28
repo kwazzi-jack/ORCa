@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "orca-ui"
+version = "0.1.0"
+description = ""
+authors = ["Brian Welman <brianallisterwelman@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+matplotlib = "^3.8.2"
+h5py = "^3.10.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
