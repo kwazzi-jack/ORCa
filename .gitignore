@@ -3,7 +3,7 @@
 #========================================
 
 # Cargo build artifacts
-/target/
+**/target/
 
 #========================================
 #||          ORCa-UI (Python)          ||
@@ -16,8 +16,11 @@ __pycache__/
 # Virtual Environments
 .env
 .venv/
-env/
-venv/
+**/env/
+**/venv/
+
+# Jupyter Notebook checkpoints
+**/.ipynb_checkpoints/
 
 #========================================
 #||          Common Files             ||
@@ -32,5 +35,5 @@ venv/
 *.png
 *.jpg
 *.jpeg
-*.mp4
 *.gif
+*.mp4
