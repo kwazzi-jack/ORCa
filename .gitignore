@@ -1,0 +1,39 @@
+#========================================
+#||         ORCa-Engine (Rust)         ||
+#========================================
+
+# Cargo build artifacts
+/target/
+
+#========================================
+#||          ORCa-UI (Python)          ||
+#========================================
+
+# Python byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Virtual Environments
+.env
+.venv/
+env/
+venv/
+
+#========================================
+#||          Common Files             ||
+#========================================
+
+# Logs and data
+*.log
+*.csv
+*.hdf5
+
+# Generated images
+*.png
+*.jpg
+*.jpeg
+*.mp4
+*.gif
+
+# OS generated files
+.DS_Store
