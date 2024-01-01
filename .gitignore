@@ -37,3 +37,7 @@ __pycache__/
 *.jpeg
 *.gif
 *.mp4
+
+# Splash Images
+!orca-splash.png
+!orca-thumbnail.png
