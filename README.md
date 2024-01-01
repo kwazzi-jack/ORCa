@@ -1,7 +1,11 @@
 # ORCa Suite
 
+<p align="center">
+  <img src="orca-splash.png" alt="ORCa Splash Image" style="width: 100%;">
+</p>
+
 ## Overview
-"**O**n-line **R**adio interferometric **Ca**libration" (ORCa) is a research prototype calibration suite designed for real-time or "online" calibration of radio interferometric data. Comprising the `ORCa-Engine` (Rust) and `ORCa-UI` (Python), ORCa is a future-centric project aiming to revolutionize real-time calibration systems in radio astronomy.
+"**O**n-line **R**adio Interferometric **Ca**libration" (ORCa) is a research prototype calibration suite designed for real-time or "online" calibration of radio interferometric data. Comprising the `ORCa-Engine` (Rust) and `ORCa-UI` (Python), ORCa is a future-centric project aiming to revolutionize real-time calibration systems in radio astronomy.
 
 ## Components
 
