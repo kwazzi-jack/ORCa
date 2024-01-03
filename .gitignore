@@ -30,6 +30,7 @@ __pycache__/
 *.log
 *.csv
 *.hdf5
+*.h5
 
 # Generated images
 *.png
