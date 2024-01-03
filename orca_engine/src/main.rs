@@ -39,14 +39,13 @@ fn main() -> hdf5::Result<()> {
     // Gaussian Process Parameters
     const N_TIME: usize = 1000; 
     let kernel = Kernels::SqrExp.kernel();
-    let gp = GaussianProcess::new(1.0, 1.0, 50.0, kernel, N_TIME);
+    let gp = GaussianProcess::new(1.0, 1.0, 1.0, kernel, N_TIME);
     debug!("Gaussian Process (GP) instantiated.");
 
     // Generate data using Gaussian Process
     let input_data: Vec<f64> = gp.generate().iter().cloned().collect();
     debug!("Input data created from GP.");
 
-    println!("{:?}", &input_data);
     // Measurable Signal Axis
     let meas_axis = Axis { mu: 0.0, sigma: 0.5 };
 
