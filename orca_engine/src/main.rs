@@ -1,3 +1,5 @@
+#[allow(non_snake_case)]
+mod calibrator;
 mod utils;
 
 use log::debug;

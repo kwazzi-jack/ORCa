@@ -1,120 +1,113 @@
+// calibrator.rs
+ // Ease on variable names
+
 use nalgebra::{DVector, DMatrix};
 
 // Estimator Trait
-trait Estimator {
-    // Initialise estimator
-    fn new(&self);
-
-    // Run estimator
-    fn compute(&self);
-}
+trait Estimator {}
 
 // Main estimators
-struct Predictor {
-    f: f64,
-    q: f64,
-}
-
-struct Filter {
-    h: f64,
-    r: f64,
-}
-
-struct Smoother {
-    f: f64,
-    q: f64,
-}
+struct Predictor;
+struct Filter;
+struct Smoother;
 
 // Prediction Step
-impl Estimator for Predictor {
-    fn new(&self, f: f64, q: f64) -> Self {
-        Predictor {
-            f: f,
-            q: q,
-        }
-    }
-
-    fn compute(&self) -> (f64, f64){
-        todo!();
+impl Predictor {
+    fn compute(mf: f64, Pf: f64, F: f64, Q: f64) -> (f64, f64){
+        return (
+            F * mf,
+            F * Pf * F + Q,
+        )
     }
 }
 
 // Update Step
-impl Estimator for Filter {
-    fn new(&self) -> Self {
-        todo!();
-    }
+impl Filter {
+    fn compute(y: f64, mp: f64, Pp: f64, H: f64, R: f64) -> (f64, f64){
+        let e = y - H * mp;
+        let S = H * Pp * H + R;
+        let K = Pp * H / S;
 
-    fn compute(&self) -> (f64, f64){
-        todo!();
+        return (
+            mp + K * e,
+            (1.0f64 - K * H) * Pp,
+        )
     }
 }
 
 // Smoothing Step
-impl Estimator for Smoother {
-    fn new(&self) -> Self {
-        todo!();
-    }
-
-    fn compute(&self) -> (f64, f64){
-        todo!();
+impl Smoother {
+    fn compute( mp: f64, Pp: f64, mf: f64, Pf: f64, ms: f64, Ps: f64, F: f64) -> (f64, f64){
+        let G = Pf * F / Pp;
+        return (
+            mf + G * (ms - mp),
+            Pf + G * (Ps - Pp) * G,
+        )
     }
 }
 
-
 pub struct Calibrator {
-    mf0: f64,
-    pf0: f64,
-    mp: Vec<f64>,
-    mf: Vec<f64>,
-    ms: Vec<f64>,
-    pp: Vec<f64>,
-    pf: Vec<f64>,
-    ps: Vec<f64>,
-    f: f64,
-    h: f64,
-    q: f64,
-    r: f64,
-    predictor: Predictor,
-    filter: Filter,
-    smoother: Smoother,
+    n_time: usize,
+    mp_values: Vec<f64>,
+    Pp_values: Vec<f64>,
+    mf_values: Vec<f64>,
+    Pf_values: Vec<f64>,
+    ms_values: Vec<f64>,
+    Ps_values: Vec<f64>,
+    y_values: Vec<f64>,
+    F: f64,
+    Q: f64,
+    H: f64,
+    R: f64,
 }
 
 impl Calibrator {
-    fn new(&self, mf0: f64, pf0: f64, f: f64, 
-            h: f64, sigma_q: f64, sigma_r: f64) {
-        
-        // Storage
-        self.mp = Vec::new();
-        self.mf = Vec::new();
-        self.ms = Vec::new();
-        self.pp = Vec::new();
-        self.pf = Vec::new();
-        self.ps = Vec::new();
-
-        // Initial
-        self.mf0 = mf0;
-        self.pf0 = pf0;
-
-        // State Functions
-        self.f = f;
-        self.h = h;
-
-        // Noise Covariance
-        self.q = q.powi(2);
-        self.r = sigma_r.powi(2);
-
-        // Estimators
-        self.predictor = Predictor::new();
-        self.filter = Filter::new();
-        self.smoother = Smoother::new();
+    fn new(y_values: Vec<f64>, F: f64, Q: f64, H: f64, R: f64) -> Self {
+        let n_time = y_values.len();
+        Calibrator {
+            n_time: n_time,
+            mp_values: Vec::with_capacity(n_time),
+            Pp_values: Vec::with_capacity(n_time),
+            mf_values: Vec::with_capacity(n_time),
+            Pf_values: Vec::with_capacity(n_time),
+            ms_values: Vec::with_capacity(n_time),
+            Ps_values: Vec::with_capacity(n_time),
+            y_values: y_values,
+            F: F,
+            Q: Q,
+            H: H,
+            R: R,
+        }
     }
 
-    fn forward(&self) {
-        todo!();
+    fn forward(&mut self, mf0: f64, Pf0: f64) {
+        // Initial Prediction Step
+        let (mp, Pp) = Predictor::compute(mf0, Pf0, self.F, self.Q);
+        self.mp_values.push(mp);
+        self.Pp_values.push(Pp);
+
+        // Initial Filter Step
+        let y1 = self.y_values[0];
+        let (mf, Pf) = Filter::compute(y1, mp, Pp, self.H, self.R);
+        self.mf_values.push(mf);
+        self.Pf_values.push(Pf);
+
+        // Run Predictor and Filter from 1 to n_time
+        for i in 1..self.n_time {
+            // Initial Prediction Step
+            let (mp, Pp) = Predictor::compute(mf, Pf, self.F, self.Q);
+            self.mp_values.push(mp);
+            self.Pp_values.push(Pp);
+
+            // Update Step
+            let y = self.y_values[i];
+            let (mf, Pf) = Filter::compute(y, mp, Pp, self.H, self.R);
+            self.mf_values.push(mf);
+            self.Pf_values.push(Pf);
+        }
     }
 
-    fn backward(&self) {
+    fn backward(&mut self) {
         todo!();
     }
 }
