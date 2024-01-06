@@ -1,6 +1,7 @@
 // calibrator.rs
  // Ease on variable names
 
+use log::debug;
 use nalgebra::{DVector, DMatrix};
 
 // Estimator Trait
@@ -62,7 +63,7 @@ pub struct Calibrator {
 }
 
 impl Calibrator {
-    fn new(y_values: Vec<f64>, F: f64, Q: f64, H: f64, R: f64) -> Self {
+    pub fn new(y_values: Vec<f64>, F: f64, Q: f64, H: f64, R: f64) -> Self {
         let n_time = y_values.len();
         Calibrator {
             n_time: n_time,
@@ -80,7 +81,7 @@ impl Calibrator {
         }
     }
 
-    fn forward(&mut self, mf0: f64, Pf0: f64) {
+    pub fn forward(&mut self, mf0: f64, Pf0: f64) {
         // Initial Prediction Step
         let (mp, Pp) = Predictor::compute(mf0, Pf0, self.F, self.Q);
         self.mp_values.push(mp);
@@ -107,7 +108,38 @@ impl Calibrator {
         }
     }
 
-    fn backward(&mut self) {
-        todo!();
+    pub fn backward(&mut self) {
+        // Initial estimates
+        let ms = self.mf_values[self.n_time - 1];
+        let Ps = self.Pf_values[self.n_time - 1];
+        self.ms_values.push(ms);
+        self.Ps_values.push(Ps);
+
+        for i in 1..self.n_time {
+            // Retrieve estimates
+            let idx = self.n_time - i - 1;
+
+            let mf = self.mf_values[idx];
+            let Pf = self.Pf_values[idx];
+            let mp = self.mp_values[idx + 1];
+            let Pp = self.Pp_values[idx + 1];
+
+            // Smoothing Step
+            let G = Pf * self.F / Pp;
+            let (ms, Ps) = Smoother::compute(mp, Pp, mf, Pf, ms, Ps, self.F);
+            self.ms_values.push(ms);
+            self.Ps_values.push(Ps);
+        }
+    }
+
+    pub fn values(&self) -> (Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>) {
+        (
+            self.mp_values.clone(),
+            self.Pp_values.clone(),
+            self.mf_values.clone(),
+            self.Pf_values.clone(),
+            self.ms_values.clone(),
+            self.Ps_values.clone(),
+        )
     }
 }

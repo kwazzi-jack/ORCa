@@ -2,7 +2,7 @@
 mod calibrator;
 mod utils;
 
-use log::debug;
+use log::{debug, info};
 use utils::{GaussianProcess, Kernels};
 use rand_distr::{Normal, Distribution};
 use hdf5::File;
@@ -14,7 +14,7 @@ struct Axis {
 
 fn measurement_operator(input: f64) -> f64 {
     // Example: Damped harmonic oscillator
-    0.5 * ((2.0 * std::f64::consts::PI * input).cos() * (-input / 8.0).exp())
+    input
 }
 
 fn simulate_data(input_data: &Vec<f64>, meas_axis: Axis) -> (Vec<f64>, Vec<f64>) {
@@ -41,7 +41,7 @@ fn main() -> hdf5::Result<()> {
     // Gaussian Process Parameters
     const N_TIME: usize = 1000; 
     let kernel = Kernels::SqrExp.kernel();
-    let gp = GaussianProcess::new(1.0, 1.0, 1.0, kernel, N_TIME);
+    let gp = GaussianProcess::new(1.0, 1.0, 20.0, kernel, N_TIME);
     debug!("Gaussian Process (GP) instantiated.");
 
     // Generate data using Gaussian Process
@@ -55,6 +55,22 @@ fn main() -> hdf5::Result<()> {
     let (output_data, noisy_data) = simulate_data(&input_data, meas_axis);
     debug!("Output data created from input data.");
 
+    // Create calibrator
+    let mut estimator = calibrator::Calibrator::new(
+        noisy_data.clone(), 1.0, 1.0, 1.0, 0.5);
+    
+    // Run forward step
+    estimator.forward(1.0, 1.0);
+    info!("Estimator completed forward step");
+    
+    // Run backward step
+    estimator.backward();
+    info!("Estimator completed backward step");
+
+    // Collect data
+    let (mp, Pp, mf, Pf, ms, Ps) 
+        = estimator.values(); 
+    
     // Create a new HDF5 file
     let file = File::create("data.h5").unwrap();
     let group = file.create_group("data").unwrap();
@@ -74,6 +90,36 @@ fn main() -> hdf5::Result<()> {
         .create("noisy_data", noisy_data.len())
         .unwrap()
         .write(&noisy_data)
+        .unwrap();
+    group.new_dataset::<f64>()
+        .create("mp", mp.len())
+        .unwrap()
+        .write(&mp)
+        .unwrap();
+    group.new_dataset::<f64>()
+        .create("Pp", Pp.len())
+        .unwrap()
+        .write(&Pp)
+        .unwrap();
+    group.new_dataset::<f64>()
+        .create("mf", mf.len())
+        .unwrap()
+        .write(&mf)
+        .unwrap();
+    group.new_dataset::<f64>()
+        .create("Pf", Pf.len())
+        .unwrap()
+        .write(&Pf)
+        .unwrap();
+    group.new_dataset::<f64>()
+        .create("ms", ms.len())
+        .unwrap()
+        .write(&ms)
+        .unwrap();
+    group.new_dataset::<f64>()
+        .create("Ps", Ps.len())
+        .unwrap()
+        .write(&Ps)
         .unwrap();
 
     Ok(())

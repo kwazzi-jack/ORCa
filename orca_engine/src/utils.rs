@@ -74,12 +74,9 @@ impl GaussianProcess {
     fn calculate_covariance_matrix(&self) -> DMatrix<f64> {
         let mut matrix = DMatrix::zeros(self.length, self.length);
         for i in 0..self.length {
-            let norm_i = i as f64 / self.length as f64;
-            for j in 0..self.length {
-                let norm_j = j as f64 / self.length as f64;
-                
+            for j in 0..self.length {                
                 // Use the kernel function to compute the covariance
-                matrix[(i, j)] = squared_exponential_kernel(norm_i, norm_j, self.std, self.scale);
+                matrix[(i, j)] = squared_exponential_kernel(i as f64, j as f64, self.std, self.scale);
             }
         }
         matrix
