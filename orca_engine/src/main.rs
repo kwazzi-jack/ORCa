@@ -1,5 +1,7 @@
 #[allow(non_snake_case)]
 mod calibrator;
+mod core;
+mod estimators;
 mod utils;
 
 use log::{debug, info};
@@ -13,7 +15,6 @@ struct Axis {
 }
 
 fn measurement_operator(input: f64) -> f64 {
-    // Example: Damped harmonic oscillator
     input
 }
 
