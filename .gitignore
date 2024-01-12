@@ -26,6 +26,9 @@ __pycache__/
 #||          Common Files             ||
 #========================================
 
+# VSCode
+**/.vscode/
+
 # Logs and data
 *.log
 *.csv
