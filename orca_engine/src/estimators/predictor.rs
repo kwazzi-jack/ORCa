@@ -1,41 +1,33 @@
-use crate::core::{Float32, Float64, Complex32, Complex64};
+use nalgebra::{Matrix, Const, DimName, Scalar, SMatrix, DMatrix, DVector};
+use crate::core::{Float, Complex};
 
-pub trait PredictorOps {
-    type Output;
-
-    fn predict(mf: Self, Pf: Self, F: Self, Q: Self) -> (Self::Output, Self::Output);
+pub fn predict_scalar_real<T>(mf: T, Pf: T, F: T, Q: T) -> (T, T) 
+where 
+    T: Float,
+{
+    (
+        F * mf, 
+        F.powi(2) * Pf + Q
+    )
 }
 
-impl PredictorOps for Float32 {
-    type Output = Float32;
-
-    fn predict(mf: Self, Pf: Self, F: Self, Q: Self) -> (Self::Output, Self::Output) {
-        (F * mf, F.powi(2) * Pf + Q)
-    }
+pub fn predict_scalar_complex<T>(mf: Complex<T>, Pf: Complex<T>, F: Complex<T>, Q: Complex<T>) -> (Complex<T>, Complex<T>) 
+where 
+    T: Float,
+{
+    let F_norm_sqr = Complex::new(F.norm_sqr(), T::zero());
+    (
+        F * mf, 
+        F_norm_sqr * Pf + Q
+    )
 }
 
-impl PredictorOps for Float64 {
-    type Output = Float64;
-
-    fn predict(mf: Self, Pf: Self, F: Self, Q: Self) -> (Self::Output, Self::Output) {
-        (F * mf, F.powi(2) * Pf + Q)
-    }
-}
-
-impl PredictorOps for Complex32 {
-    type Output = Complex32;
-
-    fn predict(mf: Self, Pf: Self, F: Self, Q: Self) -> (Self::Output, Self::Output) {
-        let F_norm_sqr = Complex32::new(F.norm_sqr(), 0.0);
-        (F * mf, F_norm_sqr * Pf + Q)
-    }
-}
-
-impl PredictorOps for Complex64 {
-    type Output = Complex64;
-
-    fn predict(mf: Self, Pf: Self, F: Self, Q: Self) -> (Self::Output, Self::Output) {
-        let F_norm_sqr = Complex64::new(F.norm_sqr(), 0.0);
-        (F * mf, F_norm_sqr * Pf + Q)
-    }
+pub fn predict_matrix_real<T>(mf: &DVector<T>, Pf: &DMatrix<T>, F: &DMatrix<T>, Q: &DMatrix<T>) -> (DVector<T>, DMatrix<T>) 
+where 
+    T: Float + Scalar,
+{
+    (
+        F * mf, 
+        F * Pf * F.transpose() + Q
+    )
 }
